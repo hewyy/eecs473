@@ -44,5 +44,5 @@ void loop() {
   varScaled |= (B11 << 6);
 
   // set the pins
-  PORTB = PORTB & VarScaled
+  PORTB = (varScaled << 2);
 }
