@@ -219,8 +219,8 @@ void moveRobot(char command) {
         case IDL:
             // TODO: make work
             Serial.println("IDEL");
-            digitalWrite(EN1, HIGH);
-            digitalWrite(EN2, HIGH);
+            digitalWrite(EN1, LOW);
+            digitalWrite(EN2, LOW);
             break;
         default:
             Serial.println("ERROR: Unknown command in legal packet");
