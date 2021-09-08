@@ -235,14 +235,15 @@ void motorControl(bool ifLeftMotor, char command) {
     int enable   = ifLeftMotor ? EN1 : EN2;
     int motorPos = ifLeftMotor ? A_1 : A_3;
     int motorNeg = ifLeftMotor ? A_2 : A_4;
+    int new_speed = ifLeftMotor ? SPEED: SPEED + 8;  
     switch (command) {
         case FORWARD:
-            analogWrite(enable, SPEED);
+            analogWrite(enable, new_speed);
             digitalWrite(motorPos, HIGH);
             digitalWrite(motorNeg, LOW);
             break;
         case BACKWARD:
-            analogWrite(enable, SPEED);
+            analogWrite(enable, new_speed);
             digitalWrite(motorPos, LOW);
             digitalWrite(motorNeg, HIGH);
             break;
