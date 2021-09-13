@@ -7,6 +7,8 @@
 #define RIGHT       'R'
 #define STOP        'S'
 #define IDL         'I'
+#define SPEED_UP    'A'
+#define SPEED_DN    'D'
 
 /**
  * @brief Start and end delimiters
@@ -221,6 +223,19 @@ void moveRobot(char command) {
             Serial.println("IDEL");
             digitalWrite(EN1, LOW);
             digitalWrite(EN2, LOW);
+            break;
+        case SPEED_UP:
+            SPEED = SPEED > 100 ? 100 : SPEED + 5;
+            analogWrite(EN1, SPEED);
+            analogWrite(EN2, SPEED);
+            break;
+        case SPEED_DN:
+            SPEED = SPEED < 0 ? 0 : SPEED - 5;
+            SPEED -= 5;
+            analogWrite(EN1, SPEED);
+            analogWrite(EN2, SPEED);
+            break;
+            
             break;
         default:
             Serial.println("ERROR: Unknown command in legal packet");
