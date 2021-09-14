@@ -6,14 +6,22 @@ class LCD {
   int read_write_pin;
   int enable_pin;
   int reg_sel_pin;
-  int data_pins[4] = {4, 6, 10, 11};
+  int data_pins[8];
+  bool four_bit_mode = false;
 
   LCD(){};
 
-  LCD(int rs, int rw, int en) {
-    reg_sel_pin = rs;
-    read_write_pin = rw;
-    enable_pin = en;
+  LCD(int rs, int rw, int en, int *data_pins_in): reg_sel_pin(rs), read_write_pin(rw), enable_pin(en) {
+    
+    // determine the number of datapins specifed
+    if (sizeof(data_pins_in)/(sizeof(data_pins_in[0]) == 4) {
+      four_bit_mode = true; 
+    }
+    
+    // copy data_pins_in
+    copy(begin(data_pins_in), end(data_pins_in), begin(data_pins));
+    
+    // pin init, set all pin values to be low
     pinMode(reg_sel_pin, OUTPUT);
     digitalWrite(reg_sel_pin, LOW);
     
@@ -21,38 +29,18 @@ class LCD {
     digitalWrite(read_write_pin, LOW);
     
     pinMode(enable_pin, OUTPUT);
+    digitalWrite(enable_pin, LOW);
+    
     for(int i = 0; i < 4; i++) {
       pinMode(data_pins[i], OUTPUT);
       digitalWrite(data_pins[i], LOW);
     }
     
-    // wait 40 ms for power on
-    delay(40);
-    // send function set (4-bit)
-    send_data(0, 0b0011, 4);
-    // wait 4.1 ms
-    delay(5);
-    send_data(0, 0b0011, 4);
-    delay(1);
-    send_data(0, 0b0011, 4);
-    delay(1);
-    send_data(0, 0b0010, 4);
-    delay(1);
-    // possibly set display size
-    send_data(0, 0b00101000); // set to 2 lines, 5x8 dot display
-    // turn display on with send_data
-    delay(1);
-    send_data(0, 0b00001000); // turn off display
-    // set entry mode pag 42 step 5
-    delay(1);
-    send_data(0, 0b00000001); // clear the display
-    delay(1);
-    send_data(0, 0b00000110); // cursor moves to the right with each char. no display shift
-    delay(1);
-
-    send_data(0, 0b00001111); // display on, cursor on, blink on
-    send_data(0, 0b00000010); // return home
-    // then you can start writing data
+    // Initialize for either 8-bit or 4-bit mode
+    if (four_bit_mode) {
+      init_four_bit();
+    } else {
+      init_eight_bit();
   }
 
   // display message
@@ -101,8 +89,7 @@ class LCD {
   private:
   
   // takes 8 bit and breaks into 2 4s
-  void send_data(int val_of_reg_sel, int data, int bits = 8) {
-      
+  void send_data(int val_of_reg_sel, int data, int bits = 8) {   
     // Read Busy Flag and Address, page 29 of second manual
     /** WAIT FOR BF **/
     Serial.println("start");
@@ -140,6 +127,36 @@ class LCD {
       }
     }
   }
+    
+  void init_eight_bit() {
+    // NOT IMPLEMENTED
+    return;
+  }
+    void init_four_bit() {
+      // FOLLOWING STEPS ON PAGE 46 OF DATASHEET (Initializing by Instruction)
+      delay(40); // wait 40ms
+      send_data(0, 0b0011, 4); // send function set (4-bit)
+      delay(5);
+      send_data(0, 0b0011, 4);
+      delay(1);
+      send_data(0, 0b0011, 4);
+      delay(1);
+      send_data(0, 0b0010, 4);
+      delay(1);
+      send_data(0, 0b00101000); // set to 2 lines, 5x8 dot display
+      delay(1);
+      send_data(0, 0b00001000); // turn off display
+      delay(1);
+
+      // set entry mode pag 42 step 5
+      send_data(0, 0b00000001); // clear the display
+      delay(1);
+      send_data(0, 0b00000110); // cursor moves to the right with each char. no display shift
+      delay(1);
+
+      send_data(0, 0b00001111); // display on, cursor on, blink on
+      send_data(0, 0b00000010); // return home
+    }
   
 };
 
