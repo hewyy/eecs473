@@ -37,18 +37,18 @@ class LCD {
     send_data(0, 0b0011, 4);
     delay(1);
     send_data(0, 0b0010, 4);
-    wait_for_busy();
+    delay(1);
     // possibly set display size
     send_data(0, 0b00101000); // set to 2 lines, 5x8 dot display
     // turn display on with send_data
-        wait_for_busy();
+    delay(1);
     send_data(0, 0b00001000); // turn off display
     // set entry mode pag 42 step 5
-        wait_for_busy();
+    delay(1);
     send_data(0, 0b00000001); // clear the display
-        wait_for_busy();
+    delay(1);
     send_data(0, 0b00000110); // cursor moves to the right with each char. no display shift
-            wait_for_busy();
+    delay(1);
 
     send_data(0, 0b00001111); // display on, cursor on, blink on
     send_data(0, 0b00000010); // return home
@@ -56,8 +56,6 @@ class LCD {
   }
 
   // display message
-  // display time == 0 is infinite, display time in ms
-
   void display(const char* message_in, double display_time = 0) {
     // for loop to write each character
     for(int i = 0; i < strlen(message_in); i++) {
@@ -66,44 +64,43 @@ class LCD {
   }
   
   // display character
-  // display time == 0 is infinite, display time in ms
   void display(char char_in, int row, int column, double display_time = 0) {
-    // move cursor to row, col ?
+    // move cursor to row, col
+    set_cursor(row, column);
     send_data(1, static_cast<int>(char_in)); 
     if (display_time > 0 ) {
       delay(display_time);
-      // clear screen completely? How to write blank space to row?
     }
-  };
-
-
-private:
-  // read busy flag
-  // if busy high the bus is in use
-  int check_bf(){
-    // need to set read pin?
-    int val = digitalRead(data_pins[3]);
-    return val;
-  };
+  }
   
-  void wait_for_busy(){
-    for(;;) {
-      delay(1);
-      return;
-      if (check_bf()) {
-        delay(1);
-      }
-      else break;
-    } 
-  };
+  void move_cursor(int shift) {
+    if (shift < 0) { //shift left
+      for (int i = 0; i < shift*(-1); i++) {
+        send_data(0, 0b00010000); 
+      } 
+    }
+    else { //shift right
+      for (int i = 0; i < shift; i++) {
+        send_data(0, 0b00010100); 
+      }   
+    }
+  }
   
-  // send data
+  void cursor_off() {
+    send_data(0, 0b00001100);
+  }
+  
+  void cursor_on() {
+    send_data(0, 0b00001110);
+  }
+  
+  private:
+  
   // takes 8 bit and breaks into 2 4s
   void send_data(int val_of_reg_sel, int data, int bits = 8) {
       
     // Read Busy Flag and Address, page 29 of second manual
     /** WAIT FOR BF **/
-    // wait_for_busy();
     Serial.println("start");
     /*** SET R/W PIN ****/
     digitalWrite(read_write_pin, LOW);
@@ -139,32 +136,12 @@ private:
       }
     }
   }
-public:
-  void move_cursor(int shift) {
   
-    if (shift < 0) { //shift left
-      for (int i = 0; i < shift*(-1); i++) {
-        send_data(0, 0b00010000); 
-      } 
-    }
-    else { //shift right
-      for (int i = 0; i < shift; i++) {
-        send_data(0, 0b00010100); 
-      }   
-    }
-  }
-  void cursor_off() {
-    send_data(0, 0b00001100);
-  }
-  
-  void cursor_on() {
-    send_data(0, 0b00001110);
-  }
-
-
 };
-// add cursor
+
+// global LCD screen
 LCD lcd1;
+
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(9600);
@@ -172,11 +149,16 @@ void setup() {
 
   lcd1 = LCD(A5, A4, 2);
   lcd1.cursor_off();
-  //digitalWrite(lcd1.enable_pin, LOW);
-    lcd1.display(0b10110111, 0, 0, 0);
-    delay(2000);
+  
+  // non-ascii char
+  lcd1.display(0b10110111, 0, 0, 0);
+  
+  delay(2000);
+  
   lcd1.display("ARDUINO RULES!", 0);
   Serial.println("arduino rules!");
+  
+  // move to next line (40 spaces to get to next line)
   lcd1.move_cursor(29);
 }
 void loop() {
@@ -184,10 +166,12 @@ void loop() {
   lcd1.display("Roomba!  ", 0);
   Serial.println("roomba!");
   delay(1500);
+  
+  // move the cursor backwards
   lcd1.move_cursor(-9);
+  
   lcd1.display("BLE 4ever", 0);
   Serial.println("BLE 4ever");
   delay(1500);
   lcd1.move_cursor(-9);
-
 }
