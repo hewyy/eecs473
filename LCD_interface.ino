@@ -94,6 +94,10 @@ class LCD {
     send_data(0, 0b00001110);
   }
   
+  void clear_display() {
+    // TODO: implement this
+  }
+  
   private:
   
   // takes 8 bit and breaks into 2 4s
