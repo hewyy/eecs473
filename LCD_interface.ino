@@ -89,42 +89,40 @@ class LCD {
   private:
   
   // takes 8 bit and breaks into 2 4s
-  void send_data(int val_of_reg_sel, int data, int bits = 8) {   
-    // Read Busy Flag and Address, page 29 of second manual
-    /** WAIT FOR BF **/
-    Serial.println("start");
-    /*** SET R/W PIN ****/
+  void send_data(int val_of_reg_sel, int data, int bits_to_send = 8) {   
+    
+    /*** SET PINS ****/
     digitalWrite(read_write_pin, LOW);
-  
-    /*** SET REG SEL ***/
     digitalWrite(reg_sel_pin, val_of_reg_sel);
-  
-    /***** SET DATA PINS ****/
-    int cover = 0b1 << (bits - 1);
+    
+    int cover = 0b1 << (bits_to_send - 1);
     int bit_to_write;
   
-    // 4-bit mode
-    //if (sizeof(data_pins)/sizeof(data_pins[0]) == 4) {
-    int pin_index = 3;
-    for(int i = 0; i < bits; i++) {
-      bit_to_write = (data & cover);
-      bit_to_write = bit_to_write >> (bits - 1 - i);
-      Serial.println(bit_to_write, BIN);
-    //  Serial.println(data_pins[pin_index]);
-      digitalWrite(data_pins[pin_index], bit_to_write);
-      cover = cover >> 1;
-      if(pin_index == 0) {
-            /*** SET EN PIN ***/
-        Serial.println("enable");
-        digitalWrite(enable_pin, LOW);
-        delay(1);
-        digitalWrite(enable_pin, HIGH);
-        delay(1);
-        digitalWrite(enable_pin, LOW);
-        pin_index = 3;
-      } else {
-        pin_index = pin_index - 1;
+    
+    if (four_bit_mode) {
+      // 4-bit data_pin mode
+      int pin_index = 3;
+      for(int i = 0; i < bits_to_send; i++) {
+        bit_to_write = (data & cover);
+        bit_to_write = bit_to_write >> (bits_to_send - 1 - i);
+        digitalWrite(data_pins[pin_index], bit_to_write);
+        cover = cover >> 1;
+        if(pin_index == 0) {
+          /*** SET EN PIN ***/
+          Serial.println("enable");
+          digitalWrite(enable_pin, LOW);
+          delay(1);
+          digitalWrite(enable_pin, HIGH);
+          delay(1);
+          digitalWrite(enable_pin, LOW);
+          pin_index = 3;
+        } else {
+          pin_index = pin_index - 1;
+        }
       }
+    } else {
+      // 8-bit data_pin mode
+      // NOT IMPLEMENTED
     }
   }
     
