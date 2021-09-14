@@ -134,12 +134,18 @@ void loop() {
     }
     else if (message[0] == '4') {
         // Display Write
-        if (!strcmp(message, "CLEAR")) {
+
+        // we don't want that first char in the message
+        char message_to_print[MESSAGE_MAX_SIZE - 1];
+        for (int i = 1; i < strlen(message); i++){
+            message_to_print[i - 1] = message[i]
+        }
+
+        if (!strcmp(message_to_print, "CLR")) {
             lcd1.clear_display();
         } else {
-            lcd1.display(message);
+            lcd1.display(message_to_print);
         }
-        return;
     }
     else {
         Serial.println("ERROR: unknown message");
