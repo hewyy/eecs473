@@ -82,7 +82,6 @@ class LCD {
    * is displayed before it is cleared. If display_time = 0, the char will not be cleared
    */  
   void display(char char_in, double display_time = 0) {
-    // move cursor to row, col
     send_data(1, static_cast<int>(char_in)); 
     if (display_time > 0) {
       delay(display_time*1000);
@@ -500,7 +499,6 @@ void moveRobot(char command) {
             motorControl(RIGHT_MOTOR,STOP);
             break;
         case IDL:
-            // TODO: make work
             Serial.println("IDEL");
             digitalWrite(EN1, LOW);
             digitalWrite(EN2, LOW);
@@ -511,7 +509,7 @@ void moveRobot(char command) {
             analogWrite(EN2, SPEED);
             break;
         case SPEED_DN:
-            SPEED = SPEED < 0 ? 0 : SPEED - 5;
+            SPEED = SPEED <= 0 ? 0 : SPEED - 5;
             analogWrite(EN1, SPEED);
             analogWrite(EN2, SPEED);
             break;
