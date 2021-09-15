@@ -24,11 +24,6 @@ class LCD {
       four_bit_mode = true; 
     } 
 
-    // some error checking
-    if (num_of_dps != 8 || num_of_dps != 4) {
-      exit(1);
-    }
-    
     // copy data_pins_in
     for (int i = 0; i < num_of_dps; i++) {
       data_pins[i] = data_pins_in[i];
