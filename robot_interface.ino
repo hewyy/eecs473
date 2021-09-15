@@ -373,6 +373,10 @@ void setup() {
     delay(10);
     Serial.println("Ready, Steady, Go");
     delay(10);
+    
+    int d[4] = {4, 6, 10, 11};
+    lcd1 = LCD(A5, A4, d, 2);
+    lcd1.cursor_off();
 }
 
 /**
