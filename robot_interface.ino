@@ -23,7 +23,7 @@ class LCD {
     if (num_of_dps == 4) {
       four_bit_mode = true; 
     } 
-
+    
     // copy data_pins_in
     for (int i = 0; i < num_of_dps; i++) {
       data_pins[i] = data_pins_in[i];
@@ -370,7 +370,7 @@ void setup() {
     delay(10);
     
     int d[4] = {4, 6, 10, 11};
-    lcd1 = LCD(A5, A4, d, 2);
+    lcd1 = LCD(A5, A4, 2, d);
     lcd1.cursor_off();
 }
 
@@ -403,8 +403,8 @@ void loop() {
 
         // we don't want that first char in the message
         char message_to_print[MESSAGE_MAX_SIZE - 1];
-        for (int i = 1; i < strlen(message); i++){
-            message_to_print[i - 1] = message[i]
+        for (int i = 1; i < strlen(message) - 1; i++){
+            message_to_print[i - 1] = message[i];
         }
 
         if (!strcmp(message_to_print, "CLR")) {
