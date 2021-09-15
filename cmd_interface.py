@@ -2,7 +2,7 @@ import msvcrt
 import serial
 
 def message_mode():
-  message = input("type message: ")
+  message = raw_input("type message: ")
 
   num_of_chars = 0
   message_packet = ""
@@ -11,8 +11,8 @@ def message_mode():
     message_packet += char
     num_of_chars += 1
 
-    if num_of_chars == 4:
-      val = "C" + "5" + "4" + message_packet + "E"
+    if num_of_chars == 3:
+      val = "C" + "4" + "4" + message_packet + "E"
       print("packet sent", val) # just for testing
       ser.write(val)
       num_of_chars = 0
@@ -26,9 +26,8 @@ def message_mode():
     ser.write(val)
 
 
-
 # main
-ser = serial.Serial('COM38', 9600)
+ser = serial.Serial('COM40', 9600)
 while 1:
   # Poll keyboard
   if msvcrt.kbhit():
@@ -40,7 +39,7 @@ while 1:
 
     # forward
     elif key == 'w':
-      ser.write('C21SE')
+      ser.write('C21FE')
 
     # backwards
     elif key == 's':
@@ -63,4 +62,4 @@ while 1:
 
     # message for display
     elif key == '`':
-      message_mode()
+	  message_mode()
