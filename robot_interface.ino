@@ -17,13 +17,16 @@ class LCD {
    * en: physical pin # for enable, data_pins_in: physical pin #'s for data pins
    * num_of_dps: how many data pins are specified
    */  
+
+       int d[4] = {4, 6, 10, 11};
+    lcd1 = LCD(A5, A4, 2, d);
   LCD(int rs, int rw, int en, int *data_pins_in, int num_of_dps = 4): reg_sel_pin(rs), read_write_pin(rw), enable_pin(en) {
     
     // determine the number of datapins specifed
     if (num_of_dps == 4) {
       four_bit_mode = true; 
     } 
-    
+
     // copy data_pins_in
     for (int i = 0; i < num_of_dps; i++) {
       data_pins[i] = data_pins_in[i];
@@ -77,6 +80,7 @@ class LCD {
    * is displayed before it is cleared. If display_time = 0, the char will not be cleared
    */  
   void display(char char_in, double display_time = 0) {
+    // move cursor to row, col
     send_data(1, static_cast<int>(char_in)); 
     if (display_time > 0) {
       delay(display_time*1000);
@@ -166,7 +170,12 @@ class LCD {
    * @brief clears all characters from display
    */  
   void clear_display() {
-    send_data(0, 0b00000001);
+    send_data(0, 0b00000010); // go home
+        // write spaces
+    for(int i = 0; i < 80; i++) {
+      send_data(1, 0b00100000);
+    }
+    send_data(0, 0b00000010); // go home
   }
   
 
@@ -253,9 +262,6 @@ class LCD {
   }
   
 };
-/** END OF LCD INTERFACE IMPLEMENTATION **/
-
-
 
 
 
@@ -403,11 +409,14 @@ void loop() {
 
         // we don't want that first char in the message
         char message_to_print[MESSAGE_MAX_SIZE - 1];
-        for (int i = 1; i < strlen(message) - 1; i++){
+        for (int i = 1; i < strlen(message) + 1; i++){
             message_to_print[i - 1] = message[i];
         }
 
-        if (!strcmp(message_to_print, "CLR")) {
+        Serial.println(message);
+        Serial.println(message_to_print);
+
+        if (!strcmp(message_to_print, "clr")) {
             lcd1.clear_display();
         } else {
             lcd1.display(message_to_print);
