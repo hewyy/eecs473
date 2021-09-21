@@ -69,8 +69,7 @@ void CPU_work(int time,int pin) {
 
 void ISR1() {
   CPU_work(100, 6);
-
-  //xSemaphoreGive(xSemaphore); //for defered interrupts
+  //xSemaphoreGiveFromISR(xSemaphore);
 }
 
 /*--------------------------------------------------*/
