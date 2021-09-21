@@ -8,7 +8,6 @@ void task2( void *pvParameters );
 static int MS_CONVERSION = 836;
 SemaphoreHandle_t xSemaphore = NULL;
 
-//void TaskAnalogRead( void *pvParameters );
 
 // the setup function runs once when you press reset or power the board
 void setup() {
@@ -23,6 +22,10 @@ void setup() {
   pinMode(6, OUTPUT);
   digitalWrite(6, LOW);
 
+  // high when in ISR
+  pinMode(7, OUTPUT);
+  digitalWrite(7, LOW);
+
   // high task2 (for the second part), is running
   pinMode(8, OUTPUT);
   digitalWrite(8, LOW);
@@ -33,7 +36,7 @@ void setup() {
 
   // initialize interrupt
   pinMode(2, INPUT_PULLUP);
-  attachInterrupt(digitalPinToInterrupt(2), ISR1, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(2), ISR1, RISING);
 
 
   Serial.begin(9600);
