@@ -8,9 +8,6 @@ void TaskThree( void *pvParameters );
 
 static int MS_CONVERSION = 836;
 SemaphoreHandle_t xSemaphore = NULL;
-SemaphoreHandle_t xSemaphore2 = NULL;
-
-//void TaskAnalogRead( void *pvParameters );
 
 // the setup function runs once when you press reset or power the board
 void setup() {
@@ -35,31 +32,9 @@ void setup() {
       Serial.println("something broke!");
   }
 
-  xSemaphore2 = xSemaphoreCreateBinary();
-  xSemaphoreGive(xSemaphore2);
-  xTaskCreate(
-    TaskOne
-    ,  "T1"   // A name just for humans
-    ,  128  // This stack size can be checked & adjusted by reading the Stack Highwater
-    ,  NULL
-    ,  1  // Priority, with 3 (configMAX_PRIORITIES - 1) being the highest, and 0 being the lowest.
-    ,  NULL );
-
-  xTaskCreate(
-    TaskTwo
-    ,  "T2"   // A name just for humans
-    ,  128  // This stack size can be checked & adjusted by reading the Stack Highwater
-    ,  NULL
-    ,  2  // Priority, with 3 (configMAX_PRIORITIES - 1) being the highest, and 0 being the lowest.
-    ,  NULL );
-
-  xTaskCreate(
-    TaskThree
-    ,  "T3"   // A name just for humans
-    ,  128  // This stack size can be checked & adjusted by reading the Stack Highwater
-    ,  NULL
-    ,  3  // Priority, with 3 (configMAX_PRIORITIES - 1) being the highest, and 0 being the lowest.
-    ,  NULL );
+  xTaskCreate(TaskOne, "T1", 128, NULL, 1, NULL);
+  xTaskCreate(TaskTwo, "T2", 128, NULL, 2, NULL);
+  xTaskCreate(TaskThree, "T3", 128, NULL, 3, NULL);
 
 
   // Now the task scheduler, which takes over control of scheduling individual tasks, is automatically started.
