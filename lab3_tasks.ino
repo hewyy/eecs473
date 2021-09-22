@@ -66,6 +66,8 @@ void loop()
 /*--------------------------------------------------*/
 void TaskOne(void *pvParameters) {
   TickType_t xLastWakeTime = xTaskGetTickCount();
+    pinMode(8, OUTPUT);
+  digitalWrite(8, LOW);
   for(;;) {
     xTaskDelayUntil(&xLastWakeTime, 85 / 15);
     digitalWrite(8, HIGH);
