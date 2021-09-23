@@ -72,7 +72,7 @@ void motorControl(int ifLeftMotor, char command);
 
 
 int DISTANCE_IN_TICKS = 0;
-const int MIN_DISTANCE = 150;
+const int MIN_DISTANCE = 15;
 const int BLINKY_CONST = 100;
 const double TICK_IN_MS = 1;
 
@@ -134,7 +134,7 @@ void task1() {
 void task2() {
 	// Note that semaphores may be valuable here to protect your global variable
 	portTickType xLastWakeTime;
-	const portTickType xFrequency = 10 / portTICK_RATE_MS;
+	const portTickType xFrequency = 100 / portTICK_RATE_MS;
 	
 	xLastWakeTime = xTaskGetTickCount();
 
