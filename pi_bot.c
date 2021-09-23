@@ -26,7 +26,7 @@
 
 //Adjust to add intermediate speeds
 #define IDLE    0
-#define SPEED   0.5
+#define SPEED   1
 
 //Adjust to reverse motor polarity
 int LEFT_MOTOR  = 1;
@@ -74,7 +74,6 @@ void motorControl(int ifLeftMotor, char command);
 int DISTANCE_IN_TICKS = 0;
 const int MIN_DISTANCE = 2;
 const int BLINKY_CONST = 100;
-const double TICK_IN_MS = 1;
 
 
 
@@ -90,6 +89,11 @@ xSemaphoreHandle mutex = NULL;
 void task1() {
 	portTickType xLastWakeTime;
 	const portTickType xFrequency = 200 / portTICK_RATE_MS;
+	
+	// 1 tick = 4 ms
+	
+		
+		
 	
 	xLastWakeTime = xTaskGetTickCount();
 
