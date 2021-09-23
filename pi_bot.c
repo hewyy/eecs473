@@ -133,7 +133,7 @@ void task1() {
 void task2() {
 	// Note that semaphores may be valuable here to protect your global variable
 	portTickType xLastWakeTime;
-	const portTickType xFrequency = 100 / portTICK_RATE_MS;
+	const portTickType xFrequency = 10 / portTICK_RATE_MS;
 	
 	xLastWakeTime = xTaskGetTickCount();
 
@@ -143,6 +143,8 @@ void task2() {
 	while(1) {
 
 		vTaskDelayUntil(&xLastWakeTime, xFrequency);
+
+		SetGpio(T2_PIN, 1);
 
 		// take semephore
 		if(xSemaphoreTake(mutex, portMAX_DELAY) == pdTRUE ) {
@@ -158,6 +160,7 @@ void task2() {
 		} else {
 			moveRobot(FORWARD);
 		}
+		SetGpio(T2_PIN, 0);
 	}
 }
 
@@ -168,6 +171,7 @@ void task3() {
 	int temp_delay = 0;
 	
 	while(1) {
+		SetGpio(T2_PIN, 1);
 
 		// TURN ON!
 		SetGpio(LED, 1);
@@ -190,6 +194,7 @@ void task3() {
 			xSemaphoreGive(mutex);
 		}
 		vTaskDelay(temp_delay);
+		SetGpio(T2_PIN, 0);
 	}
 }
 
@@ -248,6 +253,16 @@ int main(void) {
 		;
 	}
 }
+
+/****
+		TODO: Add LCD functions here.
+
+
+
+
+
+
+	****/
 
 void moveRobot(char command) {
     switch(command) {
