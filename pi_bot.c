@@ -133,7 +133,7 @@ void task1() {
 void task2() {
 	// Note that semaphores may be valuable here to protect your global variable
 	portTickType xLastWakeTime;
-	const portTickType xFrequency = 10 / portTICK_RATE_MS;
+	const portTickType xFrequency = 100 / portTICK_RATE_MS;
 	
 	xLastWakeTime = xTaskGetTickCount();
 
@@ -248,16 +248,6 @@ int main(void) {
 		;
 	}
 }
-
-/****
-		TODO: Add LCD functions here.
-
-
-
-
-
-
-	****/
 
 void moveRobot(char command) {
     switch(command) {
