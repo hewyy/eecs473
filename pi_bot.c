@@ -26,7 +26,7 @@
 
 //Adjust to add intermediate speeds
 #define IDLE    0
-#define SPEED   1
+#define SPEED   0.5
 
 //Adjust to reverse motor polarity
 int LEFT_MOTOR  = 1;
@@ -72,7 +72,7 @@ void motorControl(int ifLeftMotor, char command);
 
 
 int DISTANCE_IN_TICKS = 0;
-const int MIN_DISTANCE = 15;
+const int MIN_DISTANCE = 2;
 const int BLINKY_CONST = 100;
 const double TICK_IN_MS = 1;
 
@@ -110,7 +110,7 @@ void task1() {
 		while(ReadGpio(ECHO) == 1);
 		portTickType traveltime_in_ticks = xTaskGetTickCount() - curr;
 
-		// take semephore
+		// take semaphore
 		if(xSemaphoreTake(mutex, portMAX_DELAY) == pdTRUE ) {
 			DISTANCE_IN_TICKS = traveltime_in_ticks;
 			// give it up
@@ -130,7 +130,7 @@ void task1() {
 
 // CHECK THE DISTANCE_IN_TICKS VARIABLE
 //	- stop if needed
-//	- resume when the obstial is moved away
+//	- resume when the obstacle is moved away
 void task2() {
 	// Note that semaphores may be valuable here to protect your global variable
 	portTickType xLastWakeTime;
@@ -147,14 +147,14 @@ void task2() {
 
 		SetGpio(T2_PIN, 1);
 
-		// take semephore
+		// take semaphore
 		if(xSemaphoreTake(mutex, portMAX_DELAY) == pdTRUE ) {
 
 			temp_distance = DISTANCE_IN_TICKS;
 			// give it up
 			xSemaphoreGive(mutex);
 		}
-
+		// todo, convert ticks to cm
 		if (temp_distance < MIN_DISTANCE) {
 			moveRobot(STOP);
 
