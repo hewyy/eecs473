@@ -6,6 +6,7 @@
 
 #include <FreeRTOS.h>
 #include <task.h>
+#include <semphr.h>
 
 #include "interrupts.h"
 #include "gpio.h"
@@ -77,7 +78,7 @@ const double TICK_IN_MS = 1;
 
 
 
-SemaphoreHandle_t mutex;
+xSemaphoreHandle mutex = NULL;
 
 
 //Task 1 is implemented for you. It interfaces with the distance sensor and 
