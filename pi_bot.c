@@ -92,10 +92,6 @@ xSemaphoreHandle mutex = NULL;
 void task1() {
 	portTickType xLastWakeTime;
 	const portTickType xFrequency = 50;
-	
-	// 1 tick = 4 ms
-	
-	int quit = 0;
 		
 	
 	xLastWakeTime = xTaskGetTickCount();
@@ -113,40 +109,22 @@ void task1() {
 			vTaskDelay(1);
 			SetGpio(TRIG, 0);
 			
-			portTickType checker_1 = xTaskGetTickCount();
-			while(ReadGpio(ECHO) == 0) {
-				if ((xTaskGetTickCount() - checker_1) >= 50) {
-					quit = 1;
-					break;
-				}
-			}
+			while(ReadGpio(ECHO) == 0);
 			
 			portTickType curr = xTaskGetTickCount();
 			
 			checker_1 = xTaskGetTickCount();
-			while(ReadGpio(ECHO) == 1) {
-				if ((xTaskGetTickCount() - checker_1) >= 30 || quit) {
-						break;
-				}
-			}
+			while(ReadGpio(ECHO) == 1);
 			portTickType traveltime_in_ticks = xTaskGetTickCount() - curr;
 			
-			if (!quit) {
-				DISTANCE_IN_TICKS = traveltime_in_ticks;
-			}
 			// give it up
 			xSemaphoreGive(mutex);
 		}
 
-		quit = 0;
 		//END TASK
 		SetGpio(T1_PIN, 0);
 	}
 }
-
-/****
-		TODO: Add additional tasks here
-	****/
 
 
 // CHECK THE DISTANCE_IN_TICKS VARIABLE
@@ -158,19 +136,15 @@ void task2() {
 	const portTickType xFrequency = 100;
 	
 	xLastWakeTime = xTaskGetTickCount();
-
-
 	int temp_distance = 0;
 
 	while(1) {
 
 		vTaskDelayUntil(&xLastWakeTime, xFrequency);
-
 		SetGpio(T2_PIN, 1);
 
 		// take semaphore
 		if(xSemaphoreTake(mutex, portMAX_DELAY) == pdTRUE ) {
-
 			temp_distance = DISTANCE_IN_TICKS;
 			// give it up
 			xSemaphoreGive(mutex);
@@ -182,7 +156,6 @@ void task2() {
 		else if (temp_distance > GO_AGAIN) {
 			moveRobot(FORWARD);
 		}
-		
 		
 		SetGpio(T2_PIN, 0);
 	}
