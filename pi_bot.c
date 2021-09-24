@@ -48,7 +48,7 @@ int RIGHT_MOTOR = 0;
 
 //Trigger pins tied to each task
 #define T1_PIN 14
-#define T2_PIN 15
+#define T2_PIN 23
 #define T3_PIN 18
 
 //LCD pins. Feel free to change.
@@ -71,9 +71,12 @@ void motorControl(int ifLeftMotor, char command);
 
 
 
-int DISTANCE_IN_TICKS = 0;
+volatile int DISTANCE_IN_TICKS = 0;
 const int MIN_DISTANCE = 2;
-const int BLINKY_CONST = 100;
+const int GO_AGAIN = 5;
+const int BLINKY_CONST = 5;
+int times_close = 0;
+int times_far = 0;
 
 
 
@@ -88,40 +91,54 @@ xSemaphoreHandle mutex = NULL;
 
 void task1() {
 	portTickType xLastWakeTime;
-	const portTickType xFrequency = 200 / portTICK_RATE_MS;
+	const portTickType xFrequency = 50;
 	
 	// 1 tick = 4 ms
 	
-		
+	int quit = 0;
 		
 	
 	xLastWakeTime = xTaskGetTickCount();
 
 	while(1) {
 		vTaskDelayUntil(&xLastWakeTime, xFrequency);
-		
+		portTickType start = xTaskGetTickCount();
 		//IN TASK
 		SetGpio(T1_PIN, 1);
-
-		SetGpio(TRIG, 1);
-
-		vTaskDelay(1);
-
-		SetGpio(TRIG, 0);
-		while(ReadGpio(ECHO) == 0);
 		
-		portTickType curr = xTaskGetTickCount();
-		while(ReadGpio(ECHO) == 1);
-		portTickType traveltime_in_ticks = xTaskGetTickCount() - curr;
-
 		// take semaphore
-		if(xSemaphoreTake(mutex, portMAX_DELAY) == pdTRUE ) {
-			DISTANCE_IN_TICKS = traveltime_in_ticks;
+		if(xSemaphoreTake(mutex, xFrequency) == pdTRUE ) {
+			
+			SetGpio(TRIG, 1);
+			vTaskDelay(1);
+			SetGpio(TRIG, 0);
+			
+			portTickType checker_1 = xTaskGetTickCount();
+			while(ReadGpio(ECHO) == 0) {
+				if ((xTaskGetTickCount() - checker_1) >= 50) {
+					quit = 1;
+					break;
+				}
+			}
+			
+			portTickType curr = xTaskGetTickCount();
+			
+			checker_1 = xTaskGetTickCount();
+			while(ReadGpio(ECHO) == 1) {
+				if ((xTaskGetTickCount() - checker_1) >= 30 || quit) {
+						break;
+				}
+			}
+			portTickType traveltime_in_ticks = xTaskGetTickCount() - curr;
+			
+			if (!quit) {
+				DISTANCE_IN_TICKS = traveltime_in_ticks;
+			}
 			// give it up
 			xSemaphoreGive(mutex);
 		}
 
-
+		quit = 0;
 		//END TASK
 		SetGpio(T1_PIN, 0);
 	}
@@ -138,7 +155,7 @@ void task1() {
 void task2() {
 	// Note that semaphores may be valuable here to protect your global variable
 	portTickType xLastWakeTime;
-	const portTickType xFrequency = 100 / portTICK_RATE_MS;
+	const portTickType xFrequency = 100;
 	
 	xLastWakeTime = xTaskGetTickCount();
 
@@ -158,13 +175,15 @@ void task2() {
 			// give it up
 			xSemaphoreGive(mutex);
 		}
-		// todo, convert ticks to cm
+		
 		if (temp_distance < MIN_DISTANCE) {
 			moveRobot(STOP);
-
-		} else {
+		}
+		else if (temp_distance > GO_AGAIN) {
 			moveRobot(FORWARD);
 		}
+		
+		
 		SetGpio(T2_PIN, 0);
 	}
 }
@@ -176,30 +195,25 @@ void task3() {
 	int temp_delay = 0;
 	
 	while(1) {
-		SetGpio(T2_PIN, 1);
+		SetGpio(T3_PIN, 1);
 
 		// TURN ON!
 		SetGpio(LED, 1);
 
 		// take semephore
-		if(xSemaphoreTake(mutex, portMAX_DELAY) == pdTRUE ) {
-			temp_delay = DISTANCE_IN_TICKS * BLINKY_CONST;
-			// give it up
-			xSemaphoreGive(mutex);
-		}		
+		temp_delay = DISTANCE_IN_TICKS * BLINKY_CONST;
+			// give it up	
 		vTaskDelay(temp_delay);
 		
 		// TURN OFF!
 		SetGpio(LED, 0);
 
 		//take semephore
-		if(xSemaphoreTake(mutex, portMAX_DELAY) == pdTRUE ) {
-			temp_delay = DISTANCE_IN_TICKS * BLINKY_CONST;
-			// give it up
-			xSemaphoreGive(mutex);
-		}
+		temp_delay = DISTANCE_IN_TICKS * BLINKY_CONST;
+		// give it up
+		
 		vTaskDelay(temp_delay);
-		SetGpio(T2_PIN, 0);
+		SetGpio(T3_PIN, 0);
 	}
 }
 
