@@ -142,13 +142,13 @@ memory_write (struct file * filp, const char *buf, size_t count, loff_t * f_pos)
 {
   int rv;
   const char *tmp;
-  temp = buf;
+  tmp = buf;
 
   // circular buf
   for (size_t i = 0; i < count; i++) {
-    tmp = tmp + 1;
     rv = copy_from_user (memory_buffer + pos, tmp, 1);
     pos++;
+    tmp = tmp + 1;
     if(pos == 5) {
       pos = 0;
       wrap = 1;
