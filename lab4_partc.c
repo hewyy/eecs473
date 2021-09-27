@@ -91,7 +91,6 @@ ssize_t
 memory_read (struct file * filp, char *buf, size_t count, loff_t * f_pos) //when calling read (cat /dev/memory), how is count determined? how is the size of the requested data transfer known?
 {
 
-
   // the count is just the avaible space to write to, its not actaully the number of bytes that we are writting
 
   int rv;
@@ -106,34 +105,48 @@ memory_read (struct file * filp, char *buf, size_t count, loff_t * f_pos) //when
     if (wrap == 1) {
       if (pos == 0) {
         start = 4;
-      } else {
+      } 
+	  else {
         start = pos - 1;
       }
-    } else {
+    } 
+	else {
       start = pos - 1;
     }
-
     // read cirular buf backwards
     int mem_buff_i = start;
     int buff_i = 0;
-
-    for (int i = 0; i < 5; i++) {
+	int i;
+    for (i = 0; i < 5; i++) {
       rv=copy_to_user (buf + i, memory_buffer + mem_buff_i, 1);
+	  *f_pos += 1;
 
       if(rv) {
         printk("copy to user failed");
         return(0);
       }
 
-      mem_buff_i = mem_buff_i == 0 ? mem_buff_i = 4 : mem_buff_i - 1;
+	  
+	  if (mem_buff_i == 0) {
+		mem_buff_i = 4;
+	  }
+	  else {
+		mem_buff_i = mem_buff_i - 1;
+	  }
 
       if (((i == pos) && wrap == 0)) {
         break;
       }
     }
-    ret = wrap == 1 : 5 ? pos;
+	int ret;
+	if (wrap == 1) {
+		ret = 5;
+	}
+	else {
+		ret = pos;
+	}
     return ret;
-} else {
+	} 
   return 0;
 }
 
@@ -144,9 +157,13 @@ memory_write (struct file * filp, const char *buf, size_t count, loff_t * f_pos)
   const char *tmp;
   tmp = buf;
 
+  printk("%d", count);
+  
   // circular buf
-  for (size_t i = 0; i < count; i++) {
+  size_t i;
+  for (i = 0; i < count; i++) {
     rv = copy_from_user (memory_buffer + pos, tmp, 1);
+	*f_pos += 1;
     pos++;
     tmp = tmp + 1;
     if(pos == 5) {
