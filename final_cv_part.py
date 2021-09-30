@@ -27,6 +27,7 @@ GPIO.setmode(GPIO.BCM)
 GPIO.setup(redLed, GPIO.OUT)
 
 
+f = open("/dev/memory", "w")
 
 # print object coordinates
 def mapObjectPosition (x, y):
@@ -35,22 +36,18 @@ def mapObjectPosition (x, y):
 def move(x,y):
 	
 	if x < 255 - delta:
-		# turn left
-		f = open("/dev/memory", "w")
+		f.seek(0)		
 		f.write("L")
-		f.close()
 		
 	elif x > 255 + delta:
 		# turn right
-		f = open("/dev/memory", "w")
+		f.seek(0)
 		f.write("R")
-		f.close()
 		
 	else:
 		# go forward
-		f = open("/dev/memory", "w")
+		f.seek(0)
 		f.write("F")
-		f.close()
 	
 	
 # initialize the video stream and allow the camera sensor to warmup
@@ -85,8 +82,7 @@ while True:
 
 	# find contours in the mask and initialize the current
 	# (x, y) center of the object
-	cnts = cv2.findContours(mask.copy(), cv2.RETR_EXTERNAL,
-		cv2.CHAIN_APPROX_SIMPLE)
+	cnts = cv2.findContours(mask.copy(), cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
 	cnts = cnts[0] 
 	center = None
 
@@ -97,38 +93,34 @@ while True:
 		# centroid
 		c = max(cnts, key=cv2.contourArea)
 		((x, y), radius) = cv2.minEnclosingCircle(c)
-		#M = cv2.moments(c)
-		#center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
+		M = cv2.moments(c)
+		center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
 
 		# only proceed if the radius meets a minimum size
 		if radius > 10 and radius < stop_rad:
 			# draw the circle and centroid on the frame,
 			# then update the list of tracked points
-		#	cv2.circle(frame, (int(x), int(y)), int(radius),
-		#		(0, 255, 255), 2)
-		#	cv2.circle(frame, center, 5, (0, 0, 255), -1)
+			cv2.circle(frame, (int(x), int(y)), int(radius),(0, 255, 255), 2)
+			cv2.circle(frame, center, 5, (0, 0, 255), -1)
 			
 			# position Servo at center of circle
-		#	mapObjectPosition(int(x), int(y))
+			# mapObjectPosition(int(x), int(y))
 			print('center x,y',int(x), int(y))
 			move(int(x), int(y))
 		
-		elif stop_rad >= 50:
+		elif stop_rad >= stop_rad:
 			# stop
-			f = open("/dev/memory", "w")
+			f.seek(0)
 			f.write("S")
-			f.close()
-			
 
 	# if the ball is not detected, turn the LED off
 	else:
 		print("no ball")
-		f = open("/dev/memory", "w")
-		f.write("L")
-		f.close()
+		# f.seek(0)
+		# f.write("L")
 
 	# show the frame to our screen
-	#cv2.imshow("Frame", frame)
+	cv2.imshow("Frame", frame)
 	
 	# if [ESC] key is pressed, stop the loop
 	key = cv2.waitKey(1) & 0xFF
@@ -138,5 +130,6 @@ while True:
 # do a bit of cleanup
 print("\n [INFO] Exiting Program and cleanup stuff \n")
 GPIO.cleanup()
+f.close()
 cv2.destroyAllWindows()
 vs.stop()
