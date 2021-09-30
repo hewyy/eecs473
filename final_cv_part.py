@@ -20,8 +20,8 @@ import RPi.GPIO as GPIO
 
 # initialize LED GPIO
 redLed = 21
-delta = 20
-stop_rad = 40
+delta = 100
+stop_rad = 76
 GPIO.setwarnings(False)
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(redLed, GPIO.OUT)
@@ -35,19 +35,22 @@ def mapObjectPosition (x, y):
 
 def move(x,y):
 	
-	if x < 255 - delta:
-		f.seek(0)		
+	if x < 250 - delta:
+		f = open("/dev/memory", "w")		
 		f.write("L")
+		f.close()	
 		
-	elif x > 255 + delta:
+	elif x > 250 + delta:
 		# turn right
-		f.seek(0)
+		f = open("/dev/memory", "w")
 		f.write("R")
+		f.close()
 		
 	else:
 		# go forward
-		f.seek(0)
+		f = open("/dev/memory", "w")
 		f.write("F")
+		f.close()
 	
 	
 # initialize the video stream and allow the camera sensor to warmup
@@ -105,22 +108,23 @@ while True:
 			
 			# position Servo at center of circle
 			# mapObjectPosition(int(x), int(y))
-			print('center x,y',int(x), int(y))
+			# print('center x,y',int(x), int(y))
 			move(int(x), int(y))
 		
-		elif stop_rad >= stop_rad:
+		elif radius >= stop_rad:
 			# stop
-			f.seek(0)
+			f = open("/dev/memory", "w")
 			f.write("S")
+			f.close()
 
 	# if the ball is not detected, turn the LED off
 	else:
-		print("no ball")
-		# f.seek(0)
-		# f.write("L")
+		f = open("/dev/memory", "w")
+		f.write("L")
+		f.close()
 
 	# show the frame to our screen
-	cv2.imshow("Frame", frame)
+	# cv2.imshow("Frame", frame)
 	
 	# if [ESC] key is pressed, stop the loop
 	key = cv2.waitKey(1) & 0xFF
