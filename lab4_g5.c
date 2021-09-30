@@ -295,19 +295,19 @@ long memory_ioctl (struct file *filp, unsigned int cmd, unsigned long arg) {
 	
   // left motor polarity
   if(cmd == 0) {
-	  pol_left = arg;
+	  pol_left = (int)arg;
 	  do_last = 1;
 	  moveRobot(FORWARD);
 }
   // right motor polarity
-  else if (cmd == 1) {
-	  pol_right = arg;
+  else if (cmd == 1 && (arg == 1 || arg == 0)) {
+	  pol_right = (int)arg;
 	  do_last = 1;
 	  moveRobot(FORWARD);
   }
   // switch the left and right polarity
-  else if (cmd == 2) {
-	  if (arg == 0) {
+  else if (cmd == 1) {
+	  if (arg == 2) {
 		LEFT_MOTOR = true;
 		RIGHT_MOTOR = false;
 	  } else {
