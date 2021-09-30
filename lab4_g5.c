@@ -292,19 +292,28 @@ void motorControl(bool ifLeftMotor, char command) {
 long memory_ioctl (struct file *filp, unsigned int cmd, unsigned long arg) {
 	
   printk("<1>in ioctl\n");
+	
+  // left motor polarity
   if(cmd == 0) {
-	  LEFT_MOTOR = !LEFT_MOTOR;
-	  RIGHT_MOTOR = !RIGHT_MOTOR;
+	  pol_left = arg;
 	  do_last = 1;
 	  moveRobot(FORWARD);
 }
-  else if (cmd == 1 && arg == 0) {
-	  pol_right = !pol_right;
+  // right motor polarity
+  else if (cmd == 1) {
+	  pol_right = arg;
 	  do_last = 1;
 	  moveRobot(FORWARD);
   }
-  else if (cmd == 1 && arg == 1) {
-	  pol_left = !pol_left;
+  // switch the left and right polarity
+  else if (cmd == 2) {
+	  if (arg == 0) {
+		LEFT_MOTOR = true;
+		RIGHT_MOTOR = false;
+	  } else {
+		LEFT_MOTOR = false;
+		RIGHT_MOTOR = true;		  
+	  }
 	  do_last = 1;
 	  moveRobot(FORWARD);
   }
