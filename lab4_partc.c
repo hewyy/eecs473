@@ -119,7 +119,7 @@ memory_read (struct file * filp, char *buf, size_t count, loff_t * f_pos) //when
 	int i;
     for (i = 0; i < 5; i++) {
       rv=copy_to_user (buf + i, memory_buffer + mem_buff_i, 1);
-	  *f_pos += 1;
+      *f_pos += 1;
 
       if(rv) {
         printk("copy to user failed");
@@ -163,7 +163,7 @@ memory_write (struct file * filp, const char *buf, size_t count, loff_t * f_pos)
   size_t i;
   for (i = 0; i < count; i++) {
     rv = copy_from_user (memory_buffer + pos, tmp, 1);
-	*f_pos += 1;
+    *f_pos += 1;
     pos++;
     tmp = tmp + 1;
     if(pos == 5) {
